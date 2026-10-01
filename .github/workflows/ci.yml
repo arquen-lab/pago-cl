@@ -27,18 +27,32 @@ jobs:
         with:
           version: 11
 
+      # pnpm 11 necesita Node 22.13 o superior: instala y compila siempre con Node 24.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 24
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - name: Auditoría de dependencias
-        run: pnpm audit --audit-level=high
-      - run: pnpm lint
-      - run: pnpm typecheck
-      - run: pnpm test
       - run: pnpm build
 
-      - name: Contenido del paquete
-        run: pnpm pack --dry-run
+      - name: Auditoría de dependencias, lint y tipos
+        if: matrix.node == 24
+        run: |
+          pnpm audit --audit-level=high
+          pnpm lint
+          pnpm typecheck
+          pnpm pack --dry-run
+
+      # El SDK promete Node 20 o superior: los tests y el paquete compilado corren con cada versión.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Tests con Node ${{ matrix.node }}
+        run: node node_modules/vitest/vitest.mjs run
+
+      - name: El paquete carga en CJS y en ESM
+        run: |
+          node -e "const m = require('./dist/index.js'); if (typeof m.createPaymentAdapter !== 'function') process.exit(1)"
+          node --input-type=module -e "const m = await import('./dist/index.mjs'); if (typeof m.createPaymentAdapter !== 'function') process.exit(1)"
