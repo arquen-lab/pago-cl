@@ -80,7 +80,7 @@ En el PR cuenta qué documentación usaste y qué pudiste probar en sandbox y qu
 2. Commit a `main`: `chore: release X.Y.Z`.
 3. Crea y sube el tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
 
-El workflow `Release` espera tu aprobación en el entorno `npm`, donde vive el secret `NPM_TOKEN`. Después verifica que el tag coincida con `package.json`, corre todas las comprobaciones, publica en npm con *provenance* y crea el GitHub Release con las notas del changelog. Una versión con sufijo (`0.1.0-beta.1`) sale con el dist-tag `next` y como pre-release.
+El workflow `Release` espera tu aprobación en el entorno `npm`. Después verifica que el tag coincida con `package.json`, corre todas las comprobaciones, publica en npm y crea el GitHub Release con las notas del changelog. La publicación usa trusted publishing: npm autentica al workflow por OIDC, sin token, y cada versión queda con provenance que enlaza a este repositorio. Una versión con sufijo (`0.1.0-beta.1`) sale con el dist-tag `next` y como pre-release.
 
 ## Licencia
 

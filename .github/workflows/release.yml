@@ -1,18 +1,21 @@
 name: Release
 
 # Se dispara al subir un tag vX.Y.Z. Publica en npm y crea el GitHub Release.
+# La publicación usa trusted publishing: npm autentica a este workflow por OIDC (sin token) y genera el
+# provenance que enlaza cada versión con este repositorio. Hay que configurarlo una vez en npm:
+# paquete → Settings → Trusted publisher → GitHub Actions (arquen-lab/pago-cl, release.yml, environment npm).
 on:
   push:
     tags: ['v*.*.*']
 
 permissions:
   contents: write   # crear el release
-  id-token: write   # provenance de npm
+  id-token: write   # OIDC para el trusted publishing y el provenance de npm
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    # Entorno con aprobación manual: NPM_TOKEN vive aquí y solo se usa si alguien aprueba el release
+    # Entorno con aprobación manual: el release no avanza hasta que alguien lo aprueba
     environment: npm
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -63,11 +66,23 @@ jobs:
       - run: pnpm test
       - run: pnpm build
 
+      # `npm publish` desde el tarball y fuera del proyecto: es el que soporta trusted publishing y provenance
+      # (pnpm publish no genera provenance), y así npm no revisa el devEngines de pnpm del package.json.
+      - name: Empaquetar
+        run: pnpm pack --pack-destination "$RUNNER_TEMP/pack"
+
       - name: Publicar en npm
-        run: pnpm publish --no-git-checks --tag ${{ steps.version.outputs.npm_tag }}
+        working-directory: ${{ runner.temp }}/pack
+        run: |
+          NPM_VERSION="$(npm --version)"
+          if [ "$(printf '%s\n' 11.5.1 "$NPM_VERSION" | sort -V | head -n1)" != "11.5.1" ]; then
+            echo "::error::npm $NPM_VERSION no soporta trusted publishing (hace falta 11.5.1 o superior)"
+            exit 1
+          fi
+          npm publish ./*.tgz --provenance --access public --tag ${{ steps.version.outputs.npm_tag }}
         env:
+          # Solo respaldo mientras el trusted publisher no esté configurado; con él, npm usa OIDC y no lee el token.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: 'true'
 
       - name: GitHub Release
         run: |

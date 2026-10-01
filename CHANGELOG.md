@@ -4,8 +4,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); v
 
 ## Sin publicar
 
-- `capabilities.notifications.mode` (`none` | `optional` | `required`): dice si el webhook es necesario. El contrato exige que un webhook requerido falle sin URL y que uno opcional no la pida.
-- `PROVIDER_INFO`: nombre, sitio, documentación y logo de cada pasarela.
+## 0.0.2
+
+- Las versiones se publican desde GitHub Actions con trusted publishing: npm autentica al workflow por OIDC, sin token, y cada versión queda con provenance que enlaza a este repositorio.
 
 ## 0.0.1
 
@@ -13,6 +14,8 @@ Primera versión.
 
 ### Contrato
 
+- `capabilities.notifications.mode` (`none` | `optional` | `required`): dice si el webhook es necesario. El contrato exige que un webhook requerido falle sin URL y que uno opcional no la pida.
+- `PROVIDER_INFO`: nombre, sitio, documentación y logo de cada pasarela.
 - `createPaymentAdapter({ provider, env })` es el único punto de entrada; el mismo código sirve para todas las pasarelas.
 - Métodos uniformes: `create`, `handleReturn`, `handleNotification`, `getStatus`, `capture`, `cancel`, `refund` y `getRefund`. `create` devuelve `{ ref, redirectUrl }`; la `ref` (`PaymentRef`) se guarda con la orden y se usa en el resto.
 - `capabilities` indica qué soporta cada pasarela y `extrasSchema` describe sus campos propios.
