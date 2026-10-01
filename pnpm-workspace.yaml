@@ -1,0 +1,19 @@
+packages:
+  - .
+
+allowBuilds:
+  esbuild: true
+
+# Seguridad de la cadena de suministro (https://pnpm.io/supply-chain-security)
+# No instalar versiones publicadas hace menos de 3 días (los paquetes comprometidos suelen retirarse en horas).
+minimumReleaseAge: 4320
+# Una dependencia no puede bajar de nivel de confianza respecto de sus releases anteriores (por ejemplo perder la publicación con provenance).
+trustPolicy: no-downgrade
+# Solo se revisa la confianza de versiones de los últimos 90 días: las más antiguas ya pasaron la prueba del tiempo y muchas no traen provenance.
+trustPolicyIgnoreAfter: 129600
+# Las dependencias transitivas solo salen del registro, no de repos git ni de tarballs sueltos.
+blockExoticSubdeps: true
+# Un script de instalación que no esté en allowBuilds hace fallar la instalación en vez de omitirse en silencio.
+strictDepBuilds: true
+
+confirmModulesPurge: false

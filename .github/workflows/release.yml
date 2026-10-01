@@ -1,0 +1,80 @@
+name: Release
+
+# Se dispara al subir un tag vX.Y.Z. Publica en npm y crea el GitHub Release.
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write   # crear el release
+  id-token: write   # provenance de npm
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # Entorno con aprobación manual: NPM_TOKEN vive aquí y solo se usa si alguien aprueba el release
+    environment: npm
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          version: 11
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: El tag coincide con package.json
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          PACKAGE="$(node -p "require('./package.json').version")"
+          if [ "$VERSION" != "$PACKAGE" ]; then
+            echo "::error::El tag $GITHUB_REF_NAME no coincide con la versión de package.json ($PACKAGE)"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if [[ "$VERSION" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+            echo "npm_tag=next" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "npm_tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Notas desde el CHANGELOG
+        run: |
+          awk -v v="${{ steps.version.outputs.version }}" '
+            $0 == "## " v { found = 1; next }
+            /^## / && found { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "::error::CHANGELOG.md no tiene una sección '## ${{ steps.version.outputs.version }}'"
+            exit 1
+          fi
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+      - name: Publicar en npm
+        run: pnpm publish --no-git-checks --tag ${{ steps.version.outputs.npm_tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: 'true'
+
+      - name: GitHub Release
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file release-notes.md \
+            --verify-tag \
+            ${{ steps.version.outputs.prerelease == 'true' && '--prerelease' || '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}

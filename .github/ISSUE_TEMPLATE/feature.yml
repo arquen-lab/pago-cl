@@ -1,0 +1,20 @@
+name: Proponer una mejora
+description: Una operación, campo o comportamiento nuevo
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Qué necesitas resolver
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Cómo lo imaginas
+      description: Idealmente cómo se vería el código que usa el SDK.
+  - type: textarea
+    id: docs
+    attributes:
+      label: Documentación de la pasarela
+      description: Enlaces que respalden que la pasarela lo permite.

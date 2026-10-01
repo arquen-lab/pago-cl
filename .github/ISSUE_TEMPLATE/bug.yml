@@ -1,0 +1,48 @@
+name: Reportar un bug
+description: Algo no funciona como dice la documentación de la pasarela o del SDK
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        No pegues credenciales, tokens ni datos reales de clientes. Si lo hiciste por error, rota la clave y edita el mensaje.
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Pasarela
+      options: [transbank, flow, mercadopago, venti, getnet, klap, khipu, fintoc, ninguna en particular]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versión del SDK
+      placeholder: 0.0.1
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Ambiente
+      options: [sandbox, production]
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Node y sistema operativo
+      placeholder: Node 24, macOS
+  - type: textarea
+    id: what
+    attributes:
+      label: Qué pasó y qué esperabas
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Cómo reproducirlo
+      description: Código mínimo (sin credenciales) y el error completo, incluido `code` y `provider.*` si es un `PaymentError`.
+      render: ts
+    validations:
+      required: true

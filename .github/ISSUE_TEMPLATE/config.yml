@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Vulnerabilidad de seguridad
+    url: https://github.com/arquen-lab/pago-cl/security/advisories/new
+    about: Repórtala en privado. No abras un issue público.
+  - name: Preguntas de uso
+    url: https://github.com/arquen-lab/pago-cl/discussions
+    about: Dudas sobre cómo integrar o configurar el SDK.

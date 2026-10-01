@@ -1,0 +1,41 @@
+name: Pedir o ofrecer una pasarela nueva
+description: Integrar otro medio de pago
+labels: [provider]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Pasarela
+    validations:
+      required: true
+  - type: input
+    id: docs
+    attributes:
+      label: Documentación de la API
+    validations:
+      required: true
+  - type: dropdown
+    id: sandbox
+    attributes:
+      label: ¿Tiene sandbox con credenciales públicas o de libre registro?
+      options: ["Sí, públicas", "Sí, con registro", "No", "No lo sé"]
+    validations:
+      required: true
+  - type: checkboxes
+    id: supports
+    attributes:
+      label: Qué ofrece
+      options:
+        - label: Redirección a un checkout alojado
+        - label: Webhooks o notificaciones
+        - label: Reembolso total / parcial
+        - label: Cancelación antes del pago
+        - label: Captura diferida
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: ¿Quieres implementarla tú?
+      description: La guía está en CONTRIBUTING.md ("Agregar una pasarela").
+      options: ["Sí", "Con ayuda", "No, solo la sugiero"]
+    validations:
+      required: true

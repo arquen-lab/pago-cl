@@ -1,0 +1,83 @@
+{
+  "name": "pago-cl-sdk",
+  "version": "0.0.1",
+  "description": "Un mismo código para cobrar con Webpay, Flow, Mercado Pago, Venti, Getnet, Klap, Khipu y Fintoc",
+  "keywords": [
+    "pagos",
+    "chile",
+    "payments",
+    "transbank",
+    "webpay",
+    "flow",
+    "mercadopago",
+    "venti",
+    "getnet",
+    "klap",
+    "khipu",
+    "fintoc",
+    "checkout",
+    "typescript"
+  ],
+  "homepage": "https://github.com/arquen-lab/pago-cl#readme",
+  "bugs": {
+    "url": "https://github.com/arquen-lab/pago-cl/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arquen-lab/pago-cl.git"
+  },
+  "license": "MIT",
+  "author": "Arquen Lab",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p test/tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "VITEST_INTEGRATION=1 vitest run",
+    "prepublishOnly": "pnpm lint && pnpm build && pnpm test",
+    "check:package": "pnpm build && node -e \"require('./dist/index.js')\" && node --input-type=module -e \"import('./dist/index.mjs')\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.11.0",
+      "onFail": "download"
+    }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.14",
+    "@types/node": "^26.6.3",
+    "dotenv": "^18.0.4",
+    "tsup": "8.5.1",
+    "tsx": "^4.23.15",
+    "typescript": "6.0.3",
+    "vitest": "^5.0.2"
+  }
+}
