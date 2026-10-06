@@ -1,4 +1,3 @@
-import {randomUUID} from 'node:crypto';
 import {invalidInput} from './errors';
 
 /** Mínimo común entre pasarelas: Transbank 26, Getnet 32 y sin símbolos raros. */
@@ -12,9 +11,9 @@ export function assertOrderId(orderId: string): string {
 }
 
 export function generateOrderId(): string {
-    return randomUUID().replaceAll('-', '').slice(0, 26);
+    return globalThis.crypto.randomUUID().replaceAll('-', '').slice(0, 26);
 }
 
 export function generateRefundId(): string {
-    return `ref_${randomUUID().replaceAll('-', '').slice(0, 20)}`;
+    return `ref_${globalThis.crypto.randomUUID().replaceAll('-', '').slice(0, 20)}`;
 }
