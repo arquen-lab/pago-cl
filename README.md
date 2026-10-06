@@ -79,6 +79,27 @@ sequenceDiagram
     end
 ```
 
+## Transporte propio (`fetch`)
+
+La configuración (`env`) de cada pasarela acepta un `fetch` opcional con la firma estándar `(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>` (tipo `FetchLike`). Si no lo pasas, el SDK usa el `fetch` global, resuelto en cada llamada. Sirve para salir por un proxy, una bóveda de secretos o un doble de pruebas, sin tocar `globalThis.fetch`.
+
+```ts
+const payments = createPaymentAdapter({
+  provider: 'transbank',
+  env: {
+    commerceCode,
+    apiKey: '{{secret.apiSecret}}', // el SDK no valida ni transforma la llave: la pone tal cual en el encabezado
+    fetch: (input, init) => vault.fetch(input, init), // el transporte reemplaza la llave al salir de la red
+  },
+});
+```
+
+El SDK nunca registra el `apiKey` ni lo incluye en errores, en la `PaymentRef` o en `data`. Un fallo del transporte llega como `PaymentError` (`PROVIDER_ERROR`, reintentable).
+
+### Cloudflare Workers
+
+`generateOrderId` y la firma de Flow ya usan estándares web (`crypto.randomUUID()`, `URLSearchParams`). Aún quedan imports de `node:crypto` y `Buffer` en la verificación de webhooks y en Getnet (HMAC/SHA-256 síncronos), por lo que en Workers necesitas el flag `nodejs_compat`. Webpay Plus no los usa en su flujo, pero comparten el mismo bundle. Reemplazarlos por Web Crypto (asíncrono) cambiaría la API y queda para una versión mayor.
+
 ## Documentación
 
 - [Uso básico](docs/uso.md): reembolsos, estados, reglas comunes y errores.

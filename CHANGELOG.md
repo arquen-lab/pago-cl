@@ -4,6 +4,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); v
 
 ## Sin publicar
 
+## 0.0.3
+
+- Nueva opción `fetch` en la configuración de cada pasarela, con la firma estándar de `fetch` (tipo `FetchLike`, exportado). Si falta, se usa el `fetch` global, resuelto en cada llamada. Es aditiva: no cambia nada para quien no la use.
+- El `apiKey` se envía tal cual, sin validarlo ni transformarlo (admite marcadores como `{{secret.apiSecret}}`) y no aparece en errores ni en la `PaymentRef`.
+- `generateOrderId` usa `globalThis.crypto.randomUUID()` y la firma de Flow usa `URLSearchParams`: dos imports de Node menos (`node:crypto` y `node:querystring`). Quedan `node:crypto` y `Buffer` en webhooks y Getnet; en Workers hace falta `nodejs_compat`.
+
 ## 0.0.2
 
 - Las versiones se publican desde GitHub Actions con trusted publishing: npm autentica al workflow por OIDC, sin token, y cada versión queda con provenance que enlaza a este repositorio.
