@@ -1,6 +1,6 @@
 {
   "name": "pago-cl-sdk",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Un mismo código para cobrar con Webpay, Flow, Mercado Pago, Venti, Getnet, Klap, Khipu y Fintoc",
   "keywords": [
     "pagos",

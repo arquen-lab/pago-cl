@@ -4,6 +4,7 @@ export {CURRENCY_PRECISION, readCurrency, toMinorUnits, fromMinorUnits} from './
 export {ORDER_ID_PATTERN, generateOrderId} from './core/order-id';
 export {PaymentAdapter, type RawCaptureOptions} from './core/engine';
 export {isLocalUrl} from './core/url';
+export type {FetchLike} from './core/http';
 export {fromWebRequest, requestFields, queryParams, bodyParams, header} from './core/request';
 export * from './create-payment-adapter';
 

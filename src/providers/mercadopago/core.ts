@@ -1,11 +1,13 @@
 import {configError, verificationFailed} from '../../core/errors';
-import {callProvider, type HttpResult, type ProviderHttp} from '../../core/http';
+import {callProvider, type FetchLike, type HttpResult, type ProviderHttp} from '../../core/http';
 import {header, queryParams} from '../../core/request';
 import type {Environment, IncomingRequest} from '../../core/types';
 import {hmacSha256Hex, parseSignatureHeader, safeEqual, withinTolerance} from '../../core/webhooks';
 import {MERCADOPAGO_API, type MercadoPagoErrorResponse} from './api';
 
 export interface MercadoPagoConfig {
+    /** Transporte HTTP propio. Si falta, se usa el `fetch` global, resuelto en cada llamada. Ver `FetchLike`. */
+    fetch?: FetchLike;
     /** Access token de la aplicación (de prueba o productivo). */
     accessToken: string;
     /** Clave secreta de webhooks de la aplicación. Sin ella no se pueden verificar notificaciones. */
@@ -19,6 +21,10 @@ export interface MercadoPagoConfig {
 /** Un solo host y token para todos los productos: headers, errores y firma de webhooks. */
 export class MercadoPagoCore implements ProviderHttp {
     readonly label = 'Mercado Pago';
+
+    get fetch(): FetchLike | undefined {
+        return this.config.fetch;
+    }
 
     constructor(readonly config: MercadoPagoConfig) {
     }

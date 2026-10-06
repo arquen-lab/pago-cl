@@ -4,6 +4,11 @@ packages:
 allowBuilds:
   esbuild: true
 
+# GHSA-68fv-2mgg-jv7q: source-map-js <1.2.2 permite denegación de servicio. Llega solo por postcss (tsup y vitest, dependencias de
+# desarrollo); el paquete publicado no lo incluye. Se retira cuando postcss pida >=1.2.2.
+overrides:
+  source-map-js: '>=1.2.2'
+
 # Seguridad de la cadena de suministro (https://pnpm.io/supply-chain-security)
 # No instalar versiones publicadas hace menos de 3 días (los paquetes comprometidos suelen retirarse en horas).
 minimumReleaseAge: 4320
