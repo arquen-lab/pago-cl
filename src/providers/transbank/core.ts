@@ -1,9 +1,11 @@
 import {configError} from '../../core/errors';
-import {callProvider, type HttpResult, type ProviderHttp} from '../../core/http';
+import {callProvider, type FetchLike, type HttpResult, type ProviderHttp} from '../../core/http';
 import type {Environment} from '../../core/types';
 import {TRANSBANK_API, type TransbankErrorResponse} from './api';
 
 export interface TransbankConfig {
+    /** Transporte HTTP propio. Si falta, se usa el `fetch` global, resuelto en cada llamada. Ver `FetchLike`. */
+    fetch?: FetchLike;
     /** Código de comercio Webpay Plus (`Tbk-Api-Key-Id`). */
     commerceCode: string;
     /** Llave secreta (`Tbk-Api-Key-Secret`). */
@@ -26,6 +28,10 @@ export interface TransbankConfig {
 /** Lo común a todos los productos REST de Transbank: host, headers y errores. */
 export class TransbankCore implements ProviderHttp {
     readonly label = 'Transbank';
+
+    get fetch(): FetchLike | undefined {
+        return this.config.fetch;
+    }
     readonly environment: Environment;
 
     constructor(private readonly config: TransbankConfig) {

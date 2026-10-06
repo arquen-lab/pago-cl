@@ -1,11 +1,13 @@
 import {configError, verificationFailed} from '../../core/errors';
-import {callProvider, type HttpResult, type ProviderHttp} from '../../core/http';
+import {callProvider, type FetchLike, type HttpResult, type ProviderHttp} from '../../core/http';
 import {header} from '../../core/request';
 import type {IncomingRequest} from '../../core/types';
 import {hmacSha256Hex, parseSignatureHeader, safeEqual, withinTolerance} from '../../core/webhooks';
 import {VENTI_API, type VentiErrorResponse, type VentiEvent} from './api';
 
 export interface VentiConfig {
+    /** Transporte HTTP propio. Si falta, se usa el `fetch` global, resuelto en cada llamada. Ver `FetchLike`. */
+    fetch?: FetchLike;
     /** `key_test_...` o `key_live_...`. La clave define el modo. */
     apiKey: string;
     /** Secreto del webhook (`whs_...`). Sin él no se verifican notificaciones. */
@@ -17,6 +19,10 @@ export interface VentiConfig {
 /** Una API key para todos los productos de Venti: host, errores, idempotencia y firma. */
 export class VentiCore implements ProviderHttp {
     readonly label = 'Venti';
+
+    get fetch(): FetchLike | undefined {
+        return this.config.fetch;
+    }
 
     constructor(readonly config: VentiConfig) {
     }

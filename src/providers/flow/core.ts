@@ -1,10 +1,11 @@
-import querystring from 'node:querystring';
-import {callProvider, type HttpResult, type ProviderHttp} from '../../core/http';
+import {callProvider, type FetchLike, type HttpResult, type ProviderHttp} from '../../core/http';
 import {hmacSha256Hex} from '../../core/webhooks';
 import type {Environment} from '../../core/types';
 import {FLOW_API, type FlowErrorResponse, type FlowParams} from './api';
 
 export interface FlowConfig {
+    /** Transporte HTTP propio. Si falta, se usa el `fetch` global, resuelto en cada llamada. Ver `FetchLike`. */
+    fetch?: FetchLike;
     /** Se envía como `apiKey` en cada llamada. */
     apiKey: string;
     /** Firma cada llamada (`s`). */
@@ -21,6 +22,10 @@ export type FlowNotificationKind = 'payment' | 'refund';
 /** Un solo par de claves para todos los productos de Flow: firma, hosts y errores. */
 export class FlowCore implements ProviderHttp {
     readonly label = 'Flow';
+
+    get fetch(): FetchLike | undefined {
+        return this.config.fetch;
+    }
     readonly environment: Environment;
 
     constructor(readonly config: FlowConfig) {
@@ -49,7 +54,7 @@ export class FlowCore implements ProviderHttp {
         for (const [key, value] of Object.entries(withKey)) {
             if (value !== undefined) signed[key] = value;
         }
-        return querystring.stringify(signed);
+        return new URLSearchParams(Object.entries(signed).map(([k, v]) => [k, String(v)])).toString();
     }
 
     /** Lo que se registra en rawRequest: sin apiKey ni firma. */

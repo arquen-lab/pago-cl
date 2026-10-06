@@ -1,11 +1,13 @@
 import {configError, verificationFailed} from '../../core/errors';
-import {callProvider, type HttpResult, type ProviderHttp} from '../../core/http';
+import {callProvider, type FetchLike, type HttpResult, type ProviderHttp} from '../../core/http';
 import {header} from '../../core/request';
 import type {IncomingRequest} from '../../core/types';
 import {hmacSha256Hex, parseSignatureHeader, safeEqual, withinTolerance} from '../../core/webhooks';
 import {FINTOC_API, type FintocErrorResponse} from './api';
 
 export interface FintocConfig {
+    /** Transporte HTTP propio. Si falta, se usa el `fetch` global, resuelto en cada llamada. Ver `FetchLike`. */
+    fetch?: FetchLike;
     /** Secret key (`sk_test_...` o `sk_live_...`). Va tal cual en el header `Authorization`. */
     secretKey: string;
     /** Secreto del webhook endpoint. Cada endpoint registrado tiene el suyo. */
@@ -19,6 +21,10 @@ export interface FintocConfig {
 /** Una secret key para todos los productos de Fintoc: host, errores y verificación de webhooks. */
 export class FintocCore implements ProviderHttp {
     readonly label = 'Fintoc';
+
+    get fetch(): FetchLike | undefined {
+        return this.config.fetch;
+    }
 
     constructor(readonly config: FintocConfig) {
         if (!config.secretKey?.trim()) throw configError(this.label, 'falta secretKey');

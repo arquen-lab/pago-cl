@@ -1,7 +1,13 @@
 import {providerError} from './errors';
 import type {ProviderRawRequest} from './types';
 
+/** Firma estándar de `fetch`. Sirve para inyectar un transporte propio. */
+export type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+
 export interface ProviderHttp {
+    /** Transporte propio; si falta, `globalThis.fetch` en cada llamada. */
+    readonly fetch?: FetchLike;
+
     /** Nombre para los mensajes de error. */
     label: string;
 
@@ -44,7 +50,8 @@ export async function callProvider<T>(http: ProviderHttp, call: HttpCall): Promi
 
     let response: Response;
     try {
-        response = await fetch(call.url, {
+        const transport: FetchLike = http.fetch ?? ((input, init) => globalThis.fetch(input, init));
+        response = await transport(call.url, {
             method: call.method,
             headers: call.headers,
             body: call.body,

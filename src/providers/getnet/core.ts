@@ -1,11 +1,13 @@
 import {createHash, randomBytes} from 'node:crypto';
 import {configError, providerError, verificationFailed} from '../../core/errors';
-import {callProvider, type HttpResult, type ProviderHttp} from '../../core/http';
+import {callProvider, type FetchLike, type HttpResult, type ProviderHttp} from '../../core/http';
 import type {Environment} from '../../core/types';
 import {safeEqual, sha256Hex} from '../../core/webhooks';
 import {GETNET_API, type GetnetAuth, type GetnetNotification, type GetnetStatus} from './api';
 
 export interface GetnetConfig {
+    /** Transporte HTTP propio. Si falta, se usa el `fetch` global, resuelto en cada llamada. Ver `FetchLike`. */
+    fetch?: FetchLike;
     /** Identificador del sitio, entregado por Getnet. */
     login: string;
     /** Firma cada llamada y las notificaciones. */
@@ -22,6 +24,10 @@ export interface GetnetConfig {
  */
 export class GetnetCore implements ProviderHttp {
     readonly label = 'Getnet';
+
+    get fetch(): FetchLike | undefined {
+        return this.config.fetch;
+    }
     readonly environment: Environment;
     readonly locale: string;
 

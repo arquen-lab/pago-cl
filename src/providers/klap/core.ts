@@ -1,11 +1,13 @@
 import {configError, verificationFailed} from '../../core/errors';
-import {callProvider, type HttpResult, type ProviderHttp} from '../../core/http';
+import {callProvider, type FetchLike, type HttpResult, type ProviderHttp} from '../../core/http';
 import {header} from '../../core/request';
 import type {Environment, IncomingRequest} from '../../core/types';
 import {safeEqual, sha256Hex} from '../../core/webhooks';
 import {KLAP_API, type KlapErrorResponse} from './api';
 
 export interface KlapConfig {
+    /** Transporte HTTP propio. Si falta, se usa el `fetch` global, resuelto en cada llamada. Ver `FetchLike`. */
+    fetch?: FetchLike;
     /** Header `apikey` de todas las llamadas. También firma las notificaciones. */
     apiKey: string;
     /** Default: `sandbox`. */
@@ -20,6 +22,10 @@ export type KlapNotificationKind = 'confirm' | 'reject';
 /** Una `apikey` para todos los productos de Klap: host, errores y verificación de webhooks. */
 export class KlapCore implements ProviderHttp {
     readonly label = 'Klap';
+
+    get fetch(): FetchLike | undefined {
+        return this.config.fetch;
+    }
     readonly environment: Environment;
 
     constructor(readonly config: KlapConfig) {

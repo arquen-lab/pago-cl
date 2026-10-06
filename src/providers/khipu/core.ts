@@ -1,11 +1,13 @@
 import {configError, verificationFailed} from '../../core/errors';
-import {callProvider, type HttpResult, type ProviderHttp} from '../../core/http';
+import {callProvider, type FetchLike, type HttpResult, type ProviderHttp} from '../../core/http';
 import {header} from '../../core/request';
 import type {IncomingRequest} from '../../core/types';
 import {hmacSha256Base64, parseSignatureHeader, safeEqual, withinTolerance} from '../../core/webhooks';
 import {KHIPU_API, type KhipuErrorResponse} from './api';
 
 export interface KhipuConfig {
+    /** Transporte HTTP propio. Si falta, se usa el `fetch` global, resuelto en cada llamada. Ver `FetchLike`. */
+    fetch?: FetchLike;
     /** API key de la cuenta de cobro (header `x-api-key`). La cuenta en modo desarrollador es el sandbox. */
     apiKey: string;
     /** Secreto de la cuenta de cobro. Firma las notificaciones; sin él no se pueden verificar. */
@@ -17,6 +19,10 @@ export interface KhipuConfig {
 /** Una API key para todos los productos de Khipu: host, errores y verificación de webhooks. */
 export class KhipuCore implements ProviderHttp {
     readonly label = 'Khipu';
+
+    get fetch(): FetchLike | undefined {
+        return this.config.fetch;
+    }
 
     constructor(readonly config: KhipuConfig) {
         if (!config.apiKey?.trim()) throw configError(this.label, 'falta apiKey');
